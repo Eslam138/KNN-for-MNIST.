@@ -1,0 +1,143 @@
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+from sklearn.neighbors import  KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+train=pd.read_csv('C:/Users/moham/Downloads/mnist_train.csv')
+test=pd.read_csv('C:/Users/moham/Downloads/mnist_test.csv')
+X_train=train.drop('label',axis=1)
+y_train=train['label']
+y_train=y_train.iloc[0:30000]
+X_test=test.drop('label',axis=1)
+y_test=test['label']
+y_test=y_test.iloc[0:5000]
+X_train=np.array(X_train)
+X_test=np.array(X_test)
+ro=[]
+ro2=[]
+for i in range(0,30000):
+    sumx = 0
+    sumy = 0
+    num = 0
+    mo = []
+    x1 = []
+    y1=[]
+    num1=[]
+    j = 0
+    while j<784:
+        mo.append(X_train[i][j:j+28]) # Divide each image => 28*28
+        j+=28
+    for i in range(0,28):
+        countx=0
+        county=0
+        for z in range(0,28):
+            if i==0 or i%2==0:
+                county=0
+            else:
+                county=1
+            if z==0 or z%2==0:
+                countx=0
+            else:
+                countx=1
+            if mo[i][z]!=0:
+                sumx+=countx
+                sumy+=county
+                num+=1
+            x1.append(sumx)
+            y1.append(sumy)
+            num1.append(num)
+            sumx=0
+            sumy=0
+            num=0
+    x11=np.array(x1).reshape(28,28)
+    y11=np.array(y1).reshape(28,28)
+    n11=np.array(num1).reshape(28,28)
+    xx=0;yy=0;nn=0;p=0
+    x22=0;y22=0
+    fecturevector=[]
+    for i in range(0,28): # Divide each image 49 part => 2*2
+        for z in range(0,28):
+            if (z==0  or z%2==0) and (i==0 or i%2==0):
+                xx=x11[i][z]+x11[i][z+1]+x11[i+1][z]+x11[i+1][z+1]
+                yy=y11[i][z]+y11[i][z+1]+y11[i+1][z]+y11[i+1][z+1]
+                nn=n11[i][z]+n11[i][z+1]+n11[i+1][z]+n11[i+1][z+1]
+                if nn==0:
+                    nn=1
+                x22=xx/nn
+                y22=yy/nn
+                fecturevector.append(x22)
+                fecturevector.append(y22)
+            xx=0
+            yy=0
+            nn=0
+            x22=0
+            y22=0
+    ro.append(fecturevector)
+ro=pd.DataFrame(ro)
+classifier=KNeighborsClassifier(n_neighbors=5)
+classifier.fit(ro,y_train)
+for i in range(0,5000):
+    sumx2 = 0
+    sumy2 = 0
+    num2 = 0
+    mo2 = []
+    x1 = []
+    y1 = []
+    num1 = []
+    j = 0
+    while j<784:
+        mo2.append(X_test[i][j:j + 28])
+        j+=28
+    for i in range(0,28):
+        countx = 0
+        county = 0
+        for z in range(0,28):
+            if i == 0 or i % 2 == 0:
+                county = 0
+            else:
+                county = 1
+            if z == 0 or z % 2 == 0:
+                countx = 0
+            else:
+                countx = 1
+            if mo2[i][z] != 0:
+                sumx += countx
+                sumy += county
+                num += 1
+            x1.append(sumx)
+            y1.append(sumy)
+            num1.append(num)
+            sumx = 0
+            sumy = 0
+            num = 0
+    x11 = np.array(x1).reshape(28, 28)
+    y11 = np.array(y1).reshape(28, 28)
+    n11 = np.array(num1).reshape(28, 28)
+    xx = 0
+    yy = 0
+    nn = 0
+    p = 0
+    x22 = 0
+    y22 = 0
+    fecturevector = []
+    for i in range(0, 28):
+        for z in range(0, 28):
+            if (z == 0 or z % 2 == 0) and (i == 0 or i % 2 == 0):
+                xx = x11[i][z] + x11[i][z + 1] + x11[i + 1][z] + x11[i + 1][z + 1]
+                yy = y11[i][z] + y11[i][z + 1] + y11[i + 1][z] + y11[i + 1][z + 1]
+                nn = n11[i][z] + n11[i][z + 1] + n11[i + 1][z] + n11[i + 1][z + 1]
+                if nn == 0:
+                    nn = 1
+                x22 = xx / nn
+                y22 = yy / nn
+                fecturevector.append(x22)
+                fecturevector.append(y22)
+            xx = 0
+            yy = 0
+            nn = 0
+            x22 = 0
+            y22 = 0
+    ro2.append(fecturevector)
+ro2=pd.DataFrame(ro2)
+y_pred=classifier.predict(ro2)
+print(f"accuracy is : {accuracy_score(y_pred,y_test)}")
